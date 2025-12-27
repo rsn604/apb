@@ -1,0 +1,182 @@
+2025/10/02
+Install URL
+http://mizj.com/
+=====================================
+
+ADBDUMP 1.3 - Convert HP100LX .ADB files to ASCII
+-------------------------------------------------
+
+ADBDUMP is a utility that takes an .ADB file (the appointment book
+files have the extension .ADB) and produces an ASCII representation of
+the data. So far, ADBDUMP can produce two output formats. The default
+format is human readable and is just a means to make an .ADB file
+readable. The other format is a CDF (comma delimited) file that can be
+used to transfer the data to a different appointment book manager
+program. ADBDUMP is used as follows:
+
+   adbdump [options] <.ADB file> [<output file>]
+
+<.ADB file> is the name of the appointment book database that should be
+converted. <output file> is the name of the file to be produced. If the
+output file name is omitted, the output is written to the screen
+(to stdout, actually). The following options are available:
+
+ -c     Output comma delimited ASCII format (CDF).
+ -i xxx Include records of the types xxx into the output
+        xxx defaults to 'aetmnr', where
+        a = appointments
+        e = events
+        t = to-dos
+        m = appointments that start system macros or DOS programs
+            (i.e. those appointments whose descriptions start with '|')
+        n = non-repeated (i.e. single occurence appts. events and to-dos)
+        r = repeated appointments events and to-dos
+        (either n or r must be specified if this option is used)
+ -d fmt Use customized date format (default is "d.m.yyyy")
+        d is replaced by the day, m by the month and yyyy by the year.
+        m expands to a number, mm to a two digit number, mmm to a three
+        letter month name and mmmm to a full month name.
+        yy is expanded to a two digit and yyyy to a four digit year number
+        All other characters are taken literally. Some examples:
+           -d d.m.yyyy       -> 31.1.1995
+           -d mm.dd.yy       -> 01.31.95
+           -d mm/dd/yy       -> 01/31/95
+           -d yymmdd         -> 950131
+           -d dd-mmm-yy      -> 31-JAN-95
+           -d "dd mmmm yyyy" -> 31 January 1995
+           -d "**dd xx mm**" -> **31 xx 1**
+ -r     Retain CR/LF within CDF note fields. Without this 
+        option CR/LF is replaced by '\r\n'.
+ -q0    Do not put any double quotes around the CDF fields.
+ -q1    Put double quotes around text fields, but not around number
+        fields (default).
+ -q2    Put double quotes around all CDF fields.
+         
+Example: adbdump -c -i ar test.adb
+
+This writes all repeating appointments from test.adb in comma delimited
+format to the screen.
+
+
+FILE FORMAT:
+
+The CDF file that is generated with the -c option in ADBDUMP and needed
+as input for the ADBLOAD program is described in the following. It is
+rather idiosyncratic. The number of fields in a record is not fixed.
+
+The first four fields are the same for all records:
+
+   START DATE   "25.4.1994"
+                 if -d option is used, the format may be different
+   DESCRIPTION  "This is an appointment"
+   LOCATION     "Here"
+                In TODO items it is always ""
+   STATE        135
+                Set bits within this number have the following meaning:
+                Bit 0: alarm is set
+                Bit 1: display in monthly view (in TODO: checked off)
+                Bit 2: display in weekly view (in TODO: carry over)
+                Bit 3: ???
+                Bit 4: it is a TODO item
+                Bit 5: it is an EVENT item
+                Bit 6: it is a Stub for a repeating completed TODO
+                BIT 7: it is an APPOINTMENT item
+
+The following fields depend on STATE. If bit 7 is set (APPOINTMENT):
+
+   START TIME   "14:15"
+                24-hour format is used
+   END TIME     "15:30"
+                24-hour format is used
+   DURATION     0
+                This is the number of days the appointment lasts
+   LEAD         5
+                The number of minutes for the alarm lead time
+
+If bit 5 is set (EVENT):
+
+   DURATION     0
+                This is the number of days the event lasts
+
+If bit 4 is set (TODO):
+
+   PRIORITY     "1a"
+                Always two characters long
+   DURATION     0
+                Number of days till the TODO is due minus one
+                (or zero if no due date is set)
+
+The next field is in common for all records (APPOINTMENT, EVENT and TODO):
+
+   NOTE         "This is a note\r\nThis is the second line of the note"
+                Line breaks are replaced by \r\n, double quotes by \"
+                and the backslash by \\.
+
+If it is not a repeating item, this is the end of the record. If it is
+repeating item we are still at the beginning...:
+
+   REPEAT STATE 16
+                Set bits within this number have the following meaning:
+                Bit 0: not repeated (this should not occur)
+                Bit 1: daily repeated
+                Bit 2: weekly repeated
+                Bit 3: monthly repeated
+                Bit 4: yearly repeated
+                Bit 5: customized repeated
+   FREQUENCY    1
+   DAYS         31
+   MONTH        2048
+   START YEAR   94
+   START MONTH  0
+   START DAY    0
+   END YEAR     94
+   END MONTH    11
+   END DAY      30
+   NUMDELETED   0
+
+The interpretation of the above values seems to be somewhat different
+for different repeat modes. The last value indicates how many deleted
+items there are between the start date and the end date. If the value
+is 0, this is the last field within the record. If it is set to n, then
+there follow n of the following field quadruples:
+
+   DELYEAR      94
+   DELMONTH     2
+   DELDAY       5
+   DELFLAGS     0
+
+Don't ask me what these flags mean, but they are there.
+
+
+
+TO-DO:    (sounds better than 'bugs', doesn't it?)
+
+The input files for ADBLOAD must not have a line length of more than
+8192 characters, otherwise ADBLOAD gets hiccup. Thus, lengthy notes are
+not recommended. This limitation should probably be removed.
+
+Checked-off to-dos become not-checked-off when exported with ADBDUMP.
+
+In a honorable effort to reduce unemployment, Intel designed a
+microprocessor that uses a very useless memory segmentation scheme and
+keeps programmers busy inventing strange workarounds in order to do
+things you don't even have to think about when using a different
+processor.  ADBLOAD/ADBDUMP both keep all data in memory. The way they
+are programmed they will abort if more than about 40k memory is used
+for the data (this is of course only true for an 80x8y based machine).
+
+I read several messages on CompuServe from people who have corrupted
+.ADB files that could not be read by the built-in application (the
+application seems to be quite picky). I would like to include a
+recovery mode into the ADBDUMP program.
+
+-------------------------
+
+Please send comments, suggestions, corrupted .ADB files and bug reports to
+
+   Internet: garzotto@swssai.uu.ch
+   or CIS:   73064,1657
+
+so that I can consider them for a future release.
+
+Andreas Garzotto, December 1994
