@@ -348,7 +348,7 @@ func (m *ToDoList) doFormat(common *Common) {
 	// find.go
 	keys, _ := findAllAppts(common, "", C_NEXT, appt.STATE_APPT)
 	if len(keys) > 0 {
-		m.panel.StoreList(keys[:4], "APPT_LIST")
+		m.panel.StoreList(keys[:len(keys)], "APPT_LIST")
 	}
 	// apptlist.go
 	dd, ap := getNextAppoint(common)

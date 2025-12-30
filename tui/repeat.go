@@ -86,9 +86,9 @@ type RepeatOption struct {
 // ---------------------------------------
 // Main
 // ---------------------------------------
-func (t *RepeatOption) Run(common *Common) string {
-	if t.panel == nil {
-		t.panel = RepeatPanel()
+func (m *RepeatOption) Run(common *Common) string {
+	if m.panel == nil {
+		m.panel = RepeatPanel()
 	}
 
 	daily := &Daily{}
@@ -105,7 +105,7 @@ func (t *RepeatOption) Run(common *Common) string {
 		u := manager.GetApptByID(id)
 		for i := 0; i < 6; i++ {
 			if ((u.RepeatType >> i) & 0x01) != 0 {
-				t.panel.SelectFocus = i
+				m.panel.SelectFocus = i
 				break
 			}
 		}
@@ -114,8 +114,8 @@ func (t *RepeatOption) Run(common *Common) string {
 
 	for {
 		taps.Clear()
-		t.panel.Say()
-		k, n := t.panel.Read()
+		m.panel.Say()
+		k, n := m.panel.Read()
 		if k == tcell.KeyEscape || k == tcell.KeyF12 {
 			break
 		}
@@ -132,6 +132,10 @@ func (t *RepeatOption) Run(common *Common) string {
 				break
 			}
 		}
+
+		//@@@
+		taps.SetFocusedStyle(m.panel.GetDataField(n))
+		m.panel.GetDataField(n).Say()
 
 		if n == "D" {
 			rs := daily.Run(common)
