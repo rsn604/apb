@@ -483,6 +483,7 @@ func (m *Detail) Run(common *Common) string {
 
 			msg := ""
 			if id >= 0 && (n == "X" || k == tcell.KeyF10) {
+				appt.UpdateSdate(&u, m.panel.Get("E_SDATE"))
 				manager.UpdateAppt(u, id)
 				msg = "D.MG Record updated ."
 			} else {
