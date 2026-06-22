@@ -8,7 +8,7 @@ require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/gdamore/tcell/v2 v2.13.5
 	github.com/mattn/go-runewidth v0.0.19
-	github.com/rsn604/taps v0.0.0-20251227072214-b0a947ec84cf
+	github.com/rsn604/taps v0.0.0-20260622062825-3eb93db8c044
 )
 
 require (
