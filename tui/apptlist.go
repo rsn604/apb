@@ -463,7 +463,15 @@ func (m *ApptList) doFormat(common *Common) {
 
 	listData, focusday := GetMonthCalendar(t)
 	m.panel.StoreList(listData, "CAL")
-	m.panel.Store(fmt.Sprintf("%04d/%02d  %s", t.Year(), int(t.Month()), t.Month()), "CAL_YYYYMM")
+
+	//@@@@
+	if common.lang == "JP" {
+		m.panel.Store(fmt.Sprintf("%04d/%02d  %s", t.Year(), int(t.Month()), appt.ToJapaneseCalendar(t)), "CAL_YYYYMM")
+	} else {
+
+		m.panel.Store(fmt.Sprintf("%04d/%02d  %s", t.Year(), int(t.Month()), t.Month()), "CAL_YYYYMM")
+	}
+
 	m.panel.StoreList(getTodoList(common), "TODO_LIST") //todolist.go
 	m.panel.StoreList(getApptList(common), "S_APPT_LIST")
 

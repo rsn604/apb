@@ -1,7 +1,7 @@
 package appt
 
 import (
-	//"fmt"
+	"fmt"
 	"strings"
 	"time"
 	//"strconv"
@@ -61,6 +61,67 @@ var MonthTBL = map[string]int{
 	"OCTOBER":   0x0200,
 	"NOVEMBER":  0x0400,
 	"DECEMBER":  0x0800,
+}
+
+// ------------------------------------------------------
+type Era struct {
+	Name      string
+	StartDate time.Time
+}
+
+type DateParts struct {
+	Era   string
+	Year  string
+	Month string
+	Day   string
+}
+
+func ParseJapaneseDate(dateStr string) (*DateParts, error) {
+	re := regexp.MustCompile(`^(明治|大正|昭和|平成|令和)([\d]+|元)年(?:([\d]+)月)?(?:([\d]+)日)?$`)
+
+	matches := re.FindStringSubmatch(dateStr)
+	if matches == nil {
+		return nil, nil
+	}
+
+	return &DateParts{
+		Era:   matches[1],
+		Year:  matches[2],
+		Month: matches[3], // no match ""
+		Day:   matches[4], // no match ""
+	}, nil
+}
+
+var eras = []Era{
+	{"令和", time.Date(2019, 5, 1, 0, 0, 0, 0, time.UTC)},
+	{"平成", time.Date(1989, 1, 8, 0, 0, 0, 0, time.UTC)},
+	{"昭和", time.Date(1926, 12, 25, 0, 0, 0, 0, time.UTC)},
+	{"大正", time.Date(1912, 7, 30, 0, 0, 0, 0, time.UTC)},
+	{"明治", time.Date(1868, 1, 25, 0, 0, 0, 0, time.UTC)},
+}
+
+func ToJapaneseCalendar(t time.Time) string {
+	for _, era := range eras {
+		if t.After(era.StartDate) || t.Equal(era.StartDate) {
+			year := t.Year() - era.StartDate.Year() + 1
+			yearStr := fmt.Sprintf("%d", year)
+			if year == 1 {
+				yearStr = "元"
+			}
+			return fmt.Sprintf("%s%s年", era.Name, yearStr)
+		}
+	}
+	return ""
+}
+
+func ToGregorian(eraName string, year int) int {
+	for _, era := range eras {
+		if era.Name == eraName {
+			gregorianYear := era.StartDate.Year() + year - 1
+			return gregorianYear
+		}
+	}
+	return 0
 }
 
 //

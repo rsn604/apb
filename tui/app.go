@@ -4,24 +4,33 @@ import (
 	"apb/appt"
 	"fmt"
 	"github.com/rsn604/taps"
-	"os"
+	//"os"
+	"flag"
+	"strings"
 )
 
 func App() {
 	common := NewCommon()
 	common.setCurrentTime()
 
-	if len(os.Args) == 3 {
-		common.databaseName = os.Args[1]
-		common.connectString = os.Args[2]
-	} else if len(os.Args) == 2 {
+	lang := flag.String("lang", "", "Language")
+	flag.Parse()
+
+	common.lang = strings.ToUpper(*lang)
+
+	if flag.NArg() == 2 {
+		common.databaseName = flag.Arg(0)
+		common.connectString = flag.Arg(1)
+	} else if flag.NArg() == 1 {
 		common.databaseName = "BOLT"
-		common.connectString = os.Args[1]
+		common.connectString = flag.Arg(0)
 	} else {
 		taps.Quit()
 		fmt.Println("Usage: apb <DB name>")
 		return
 	}
+
+	//@@@@@
 
 	common.cols, common.rows = taps.GetWindowSize()
 	//if common.cols >= 50 {

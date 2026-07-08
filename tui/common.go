@@ -13,6 +13,7 @@ type Common struct {
 	connectString string
 	cols          int
 	rows          int
+	lang          string
 }
 
 func NewCommon() *Common {

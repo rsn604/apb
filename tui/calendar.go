@@ -355,7 +355,13 @@ func (m *Calendar) doFormat(common *Common) {
 		listData, today := GetMonthCalendar(t)
 		name := fmt.Sprintf("CAL%02d", i)
 		m.panel.StoreList(listData, name)
-		m.panel.Store(fmt.Sprintf("%04d/%02d  %s", t.Year(), int(t.Month()), t.Month()), name+"_YYYYMM")
+
+		if common.lang == "JP" {
+			m.panel.Store(fmt.Sprintf("%04d/%02d  %s", t.Year(), int(t.Month()), appt.ToJapaneseCalendar(t)), name+"_YYYYMM")
+		} else {
+			m.panel.Store(fmt.Sprintf("%04d/%02d  %s", t.Year(), int(t.Month()), t.Month()), name+"_YYYYMM")
+		}
+
 		//@@@@
 		t = nextMonth(t)
 		if i > 1 {
@@ -419,14 +425,16 @@ func (m *Calendar) Run(common *Common) string {
 			continue
 		}
 
-		if n == "H" || k == tcell.KeyF1 {
-			//break
-		}
+		/*
+			if n == "H" || k == tcell.KeyF1 {
+				//break
+			}
+		*/
 
 		if n == "G" || k == tcell.KeyF5 {
 			rs := godate.Run(common)
-			if rs == "Q" {
-				//break
+			if appt.CheckYMD(rs) {
+				common.currentTime, _ = time.Parse(appt.DATE_FORMAT, rs)
 			}
 			continue
 		}

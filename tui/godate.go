@@ -7,6 +7,7 @@ import (
 	"apb/appt"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rsn604/taps"
+	"strconv"
 	"strings"
 )
 
@@ -266,6 +267,25 @@ func (m *GoDate) Run(common *Common) string {
 			if appt.CheckYMD(goDate) {
 				return goDate
 			}
+
+			///@@@@
+			parts, err := appt.ParseJapaneseDate(goDate)
+			if err != nil {
+				continue
+			}
+
+			yearJP, _ := strconv.Atoi(parts.Year)
+			year := appt.ToGregorian(parts.Era, yearJP)
+			month := 1
+			if parts.Month != "" {
+				month, _ = strconv.Atoi(parts.Month)
+			}
+			day := 1
+			if parts.Day != "" {
+				day, _ = strconv.Atoi(parts.Day)
+			}
+			return fmt.Sprintf("%04d/%02d/%02d", year, month, day)
+
 		}
 
 		if n == "Q" || k == tcell.KeyF12 {
